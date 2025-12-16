@@ -91,23 +91,31 @@
 
         /* ------------------- القائمة الجانبية (Sidebar) - أنماط محسّنة ------------------- */
         .sidebar {
-            /* 🚨 أهم نقطة هنا هي width: 0; لتبدأ مخفية وتمنع الوميض */
+            /* 🚨 التعديل الجذري لمنع الوميض: البدء بـ display: none */
+            display: none; /* **يضمن عدم ظهورها إطلاقاً عند التحميل** */
+            
             height: auto; 
             max-height: 100vh; 
-            width: 0;
+            width: 0; 
             position: fixed;
             z-index: 2000;
             top: 0;
             right: 0; /* يبدأ من اليمين لـ RTL */
             background-color: #2c3e50; /* لون غامق أنيق */
             overflow-x: hidden;
-            transition: 0.3s; /* هذا الانتقال يعمل فقط عندما يتم تغيير الـ width في JavaScript */
+            transition: 0.3s; /* هذا الانتقال يعمل فقط عندما يتم تغيير الـ width */
             padding-bottom: 20px; 
             box-shadow: -5px 0 15px rgba(0, 0, 0, 0.4);
             color: var(--white-color);
-            display: flex;
+            /* **ملاحظة:** تم نقل خاصية display: flex إلى دالة openNav في JavaScript */
             flex-direction: column;
             box-sizing: border-box; 
+        }
+
+        /* 💡 كلاس جديد للتحكم بالظهور والـ width */
+        .sidebar.is-open {
+            display: flex; /* تفعيل العرض عند الفتح */
+            width: 250px;
         }
 
         [dir="ltr"] .sidebar {
@@ -462,7 +470,7 @@
 
         /* ------------------- استعلام وسائط خاص للهواتف ------------------- */
         @media (max-width: 600px) {
-            .sidebar { width: 80%; }
+            .sidebar.is-open { width: 80%; }
             .products-grid { 
                 grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
                 gap: 15px; 
@@ -1420,13 +1428,26 @@
         // ------------------ وظائف القائمة الجانبية (Sidebar) ------------------
 
         function openNav() {
-            // 🚨 يتم تغيير العرض هنا إلى 250px ليظهر
-            document.getElementById("mySidebar").style.width = "250px"; 
+            const sidebar = document.getElementById("mySidebar");
+            // 1. تفعيل العرض فوراً (يظهر المحتوى ولكن العرض لا يزال 0 بسبب transition)
+            sidebar.style.display = "flex"; 
+            
+            // 2. تأخير بسيط (بفارق 10 مللي ثانية) لتفعيل الانتقال وتغيير العرض
+            setTimeout(() => {
+                 sidebar.classList.add('is-open'); 
+            }, 10);
         }
 
         function closeNav() {
-            // 🚨 يتم تغيير العرض هنا إلى 0 ليختفي
-            document.getElementById("mySidebar").style.width = "0"; 
+            const sidebar = document.getElementById("mySidebar");
+            
+            // 1. إزالة الكلاس (تبدأ الحركة الانتقالية لتصغير العرض إلى 0)
+            sidebar.classList.remove('is-open'); 
+            
+            // 2. الانتظار حتى انتهاء الحركة (0.3 ثانية كما في CSS) ثم إخفاء العرض تماماً
+            setTimeout(() => {
+                 sidebar.style.display = "none"; 
+            }, 300); // يجب أن تتطابق القيمة مع قيمة transition في CSS (0.3s = 300ms)
         }
 
         // ------------------ وظيفة فلترة المنتجات حسب الفئة (مُعدلة) ------------------
